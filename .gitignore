@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Data
+*.RDS
+
+# Other
+*.Rproj
+/rsconnect
+/png
+*.html
+

@@ -1,0 +1,51 @@
+h1 {
+  color: darkviolet;
+  font-family: 'Roboto Slab', serif;
+}
+h2 {
+  color: darkviolet;
+  font-family: 'Roboto Slab', serif;
+}
+h3 {
+  color: darkviolet;
+  font-family: 'Roboto Slab', serif;
+}
+body {
+  background-color: white;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 12;
+}
+.topicsList .topic {
+    font-family: 'Roboto Slab', serif;
+    line-height: 40px;
+    font-size: 15px;
+    padding-left: 10px;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: 2px 80px;
+    background-position: left 100%;
+    background-position-y: 100%;
+    background-image: url(images/topicProgress.png);
+    border-bottom: 1px solid darkviolet;
+    -webkit-transition-property: background-position;
+    transition-property: background-position;
+    -webkit-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
+.topicsList .topic {
+    font-family: 'Roboto Slab', serif;
+    line-height: 40px;
+    font-size: 15px;
+    padding-left: 10px;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: 2px 80px;
+    background-position: left 100%;
+        background-position-y: 100%;
+    background-image: url(images/topicProgress.png);
+    border-bottom: 1px solid darkviolet;
+    -webkit-transition-property: background-position;
+    transition-property: background-position;
+    -webkit-transition-duration: 0.25s;
+    transition-duration: 0.25s;
+}
