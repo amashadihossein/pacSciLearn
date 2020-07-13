@@ -1,5 +1,5 @@
 ---
-title: "PacSci Learn at home (Under Construction)"
+title: "PacSci Learn at Home (Under Construction)"
 output: 
   learnr::tutorial:
     css: "css/styles.css"
@@ -7,37 +7,79 @@ runtime: shiny_prerendered
 ---
 
 ```{r setup, include=FALSE}
+options(warn=-1)
 library(learnr)
 library(conflicted)
 library(tidyverse)
 library(plotly)
 library(ggsci)
-
+library(fontawesome)
 conflict_prefer("filter", "dplyr")
 
 knitr::opts_chunk$set(echo = FALSE)
-d <- read_rds(path = "./pacSci__TCGA_BRCA_data.RDS")
+d <- d0 <- read_rds(path = "./pacSci__TCGA_BRCA_data.RDS")
 
+# Clean up: Remove columsn with too many NAs in subtype
+d$molecular_subtype <- d$molecular_subtype %>% 
+  rename(submitter_id = patient) %>%
+  mutate_if(.predicate = is.character, .funs = function(x) replace(x,x=="NA",NA)) %>%
+  purrr::discard(~sum(is.na(.x))/length(.x)* 100 >=50) 
 ```
+
 
 ## Introduction
 
 ### A Short Video
 ![](https://www.youtube.com/watch?v=Ct18nkmIFaw)
 
-### Summary Stats
-As with any analysis, we first need to better understand our data. Some basic descriptive statistics can help us evaluate how representative our sample is to the population for which we are making an inference.
+### Descriptive Statistics
+In your quest to discover how to develop treatment for breast cancer, modern machine learning and artificial intelligence (AI) algorithm can be your `r fa("superpowers",   fill ="red")` super power `r fa("superpowers",   fill ="red")` . But before you start your search for the best algorithm, you know that "Bad" data means misleading results, no matter how sophisticated the machine learning algorithm you have. But how can you tell a data is "good" or "bad". This is not always easy, but for one thing you want to make sure the data you are using has been collected from the same general group of patients you are interested in studying. In other words, you want your data to be a **representative** sample.
+With that in mind, let's first try to understand our data. Some basic descriptive statistics can help us evaluate how representative our sample is to the population for which we are interested in applying our data.
 
 ```{r data overview, fig.width=10}
-d$clin %>% group_by(race) %>% tally %>% ggplot(aes(x="",y=n,fill=race)) + 
-  geom_col(width = 1) +  coord_polar("y", start=0) + theme_void() + 
-  ggsci::scale_fill_jama() + theme(legend.position = "bottom")
+# d$clin %>% group_by(race) %>% tally %>% ggplot(aes(x="",y=n,fill=race)) + 
+#   geom_col(width = 1) +  coord_polar("y", start=0) + theme_void() + 
+#   ggsci::scale_fill_jama() + theme(legend.position = "bottom")
 
-(d$clin %>% filter(!is.na(age_at_diagnosis)) %>% ggplot(aes(x=age_at_diagnosis/365)) + 
-    geom_histogram(colour="white",bins = 30) + xlab("Age at diagnosis (years)")) %>%
-  ggplotly(.)
+p1 <- plotly::plot_ly() %>% add_pie(data = dplyr::count(d$clin,race), labels = ~race, values = ~n)#,name = "race", domain = list(x = c(0, 0.4), y = c(0, 1)))
+                                    
+
+
+g_age <- d$clin %>% mutate(age_at_diagnosis = age_at_diagnosis/365) %>% filter(!is.na(age_at_diagnosis)) %>% ggplot(aes(x=age_at_diagnosis)) + 
+    geom_histogram(colour="white", binwidth = 10) + xlab("Age at diagnosis (years)") +
+  scale_x_continuous(breaks = seq(20,100,5)) +
+  scale_y_continuous(breaks = seq(0,500,20))
+
+p2 <- g_age %>% ggplotly(.)
+
+p1
+p2
+
+# plotly::subplot(p1, p2, nrows = 1) %>%  plotly::layout(xaxis = list(domain = list(x = c(0, .49), y = c(0,1))))
 ```
 
+Looking at the plots above, let's try to ask if our data is representative
+
+<div id="hover-hint">
+**Hint:**  mouse over `r fa("mouse-pointer",   fill ="black")`  the plots
+</div>
+
+```{r descriptive_statistics}
+
+n_age30 <- ggplot_build(g_age)$data[[1]] %>% filter(x==30) %>% pull(y)
+quiz(
+  question("How many patients are between 25 and 35 years old?",
+    answer(as.character(round(n_age30 * 2))),
+    answer(as.character(round(n_age30 *  1.5))),
+    answer(as.character(round(n_age30 *  1)), correct = TRUE),
+    answer(as.character(round(n_age30 *  0.5)))
+  ),
+  question("Would this be a representative dataset if you wanted to learn about population of patients 30 or younger?",
+    answer("Yes"),
+    answer("No", correct = TRUE)
+  )
+)
+```
 
 
 
@@ -52,6 +94,7 @@ Write the R code required to add two plus two:
 ```{r two-plus-two, exercise=TRUE}
 
 ```
+
 
 ### Exercise with Code
 
