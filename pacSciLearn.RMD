@@ -8,32 +8,18 @@ runtime: shiny_prerendered
 
 ```{r setup, include=FALSE}
 options(warn=-1)
-library(learnr)
-library(conflicted)
-library(tidyverse)
-library(plotly)
-library(ggsci)
-library(fontawesome)
-conflict_prefer("filter", "dplyr")
-
 knitr::opts_chunk$set(echo = FALSE)
-d <- d0 <- read_rds(path = "./pacSci__TCGA_BRCA_data.RDS")
-
-# Clean up: Remove columsn with too many NAs in subtype
-d$molecular_subtype <- d$molecular_subtype %>% 
-  rename(submitter_id = patient) %>%
-  mutate_if(.predicate = is.character, .funs = function(x) replace(x,x=="NA",NA)) %>%
-  purrr::discard(~sum(is.na(.x))/length(.x)* 100 >=50) 
+source("./global.R")
 ```
 
 
 ## Introduction
 
 ### A Short Video
-![](https://www.youtube.com/watch?v=Ct18nkmIFaw)
+![](https://www.youtube.com/watch?v=6KiLt2yt5xI)
 
 ### Descriptive Statistics
-In your quest to discover how to develop treatment for breast cancer, modern machine learning and artificial intelligence (AI) algorithm can be your `r fa("superpowers",   fill ="red")` super power `r fa("superpowers",   fill ="red")` . But before you start your search for the best algorithm, you know that "Bad" data means misleading results, no matter how sophisticated the machine learning algorithm you have. But how can you tell a data is "good" or "bad". This is not always easy, but for one thing you want to make sure the data you are using has been collected from the same general group of patients you are interested in studying. In other words, you want your data to be a **representative** sample.
+In your quest to help breast cancer patients better quantify their risk, modern machine learning and artificial intelligence (AI) algorithms can give you `r fa("superpowers",   fill ="red")` super power `r fa("superpowers",   fill ="red")` . But before you start your search for the most powerful algorithm, you know that "Bad" data means misleading results, no matter how sophisticated the machine learning algorithm you have. But how can you tell a data is "good" or "bad"? This is not always easy, but for one thing you want to make sure the data you are using has been collected from the same general group of patients you are interested in studying. In other words, you want your data to be a **representative** sample.
 With that in mind, let's first try to understand our data. Some basic descriptive statistics can help us evaluate how representative our sample is to the population for which we are interested in applying our data.
 
 ```{r data overview, fig.width=10}
