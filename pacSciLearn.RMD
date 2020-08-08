@@ -10,16 +10,98 @@ runtime: shiny_prerendered
 options(warn=-1)
 knitr::opts_chunk$set(echo = FALSE)
 source("./global.R")
+
+# Just get the data we need
+sample_data_expected_n <- 100
+sample_data <- d$gx$Primary_solid_Tumor %>% slice(1:95)
 ```
 
 
 ## Introduction
+(VIDEO HERE)
+<!-- ### A Short Videoe -->
+<!-- ![](https://www.youtube.com/watch?v=6KiLt2yt5xI) -->
 
-### A Short Video
-![](https://www.youtube.com/watch?v=6KiLt2yt5xI)
+
+(VIDEO or ART HERE)
+
+
+:::note
+### Don't Skip me! Navigating the site.
+This site is setup to accompany you as you try your hands at some of the tools, technologies and science that power bioinformatics. We want to share a few quick tips before you get on your way
+
+1. On the left, you see tabs that will help you navigate through this page
+2. There are multiple choice questions along the way and even optional coding. They are just to help you, we don't keep track :)
+3. We said, we don't keep track, that is true, but again to help you, the site remembers your answers, so you can pick up where you left off
+4. Remember if you wanted to start fresh, you can always hit the **start over** button
+:::
+
+
+
+Explore and have fun!
+
+## Checking Data Integrity
+(ACTIVITY VIDEO HERE)
+
+In your mission to help breast cancer patients better quantify their risk, modern machine learning and artificial intelligence (AI) algorithms can give you `r fa("superpowers",   fill ="red")` super power `r fa("superpowers",   fill ="red")`. Think of yourself as a detective, and your four-legged assistant here would be the algorithm you use. As a detective, you would want your detective dog to have a sensitive and accurate nose. Likewise, as a bioinformatician, you want an algorithm that sensitive and accurate.
+
+But beside and accurate and sensitive nose, as a detective you want your dog to be well-trained. Imagine, you wanted your dog to pick up the scent of a dangerous chemical in a warehouse filled with different shipments. For that you need to have trained your dog with the right scents or you'd have little chance of success. Similarly, your algorithm needs to have seen the right samples to be able to properly distinguish between cancers that may pose more risk to a patient than those that are more easily treatable. 
+
+So before thinking about the algorithm, like any good detective, we want to check the authenticity of our evidence.  Here, data is our evidence. As a starter, we have been given a sample data for evaluation. We have been told it has come from `r sample_data_expected_n` patients. Data is organized in a table, with each row representing a patient and each column representing a gene measured for that patient. Ok, let's take a look by pressing the buttons. 
+
+<div id="rowcount-hint">
+**Hint:**  Think which one of the buttons help us answer if all patients are represented in the data
+</div>
+
+```{r, echo=FALSE}
+inputPanel(actionButton("nrow_pushed", "Count number of rows"))
+inputPanel(actionButton("ncol_pushed", "Count number of columns"))
+textOutput("row_count")
+textOutput("col_count")
+```
+
+```{r, context="server"}
+count_rows <- eventReactive(input$nrow_pushed, glue("There are {nrow(sample_data)} rows"))
+count_cols <- eventReactive(input$ncol_pushed, glue("There are {ncol(sample_data)} columns"))
+output$row_count <- renderText(count_rows())
+output$col_count <- renderText(count_cols())
+```
+
+
+:::code
+#### Use `r fa("r-project",   fill ="steelblue")` (Optional): 
+
+The command to count the number of rows is `nrow`  and the data table you want to count is called **sample_data**. So how can you command R to count the number of rows in your data table? You pass your data table to it for counting. Passing can be done by `%>%` symbol, which is known as pipe. So you can try: `sample_data %>% nrow` in the console below. You can then hit Enter on your keyboard or simply use the Run Code button.
+Challenge: How would you count the number of columns if I tell you `ncol` is the command for counting columns?
+```{r count_rows, exercise=TRUE}
+
+```
+:::
+
+<div id="npatient-hint">
+**Hint:** We expect `r sample_data_expected_n` patients in the sample data we have received.
+</div>
+
+```{r data_integrity_qz}
+quiz(
+  question("Does our data have as many patients represented in it as we expected?",
+    answer("Yes"),
+    answer("No, we are missing 5", correct = TRUE),
+    answer("No, we are missing 46"),
+    answer("No, we have 3 more patients than expected")
+  )
+)
+```
+
+
+
+## Checking Data Quality
+
+(ACTIVITY VIDEO HERE)
 
 ### Descriptive Statistics
-In your quest to help breast cancer patients better quantify their risk, modern machine learning and artificial intelligence (AI) algorithms can give you `r fa("superpowers",   fill ="red")` super power `r fa("superpowers",   fill ="red")` . But before you start your search for the most powerful algorithm, you know that "Bad" data means misleading results, no matter how sophisticated the machine learning algorithm you have. But how can you tell a data is "good" or "bad"? This is not always easy, but for one thing you want to make sure the data you are using has been collected from the same general group of patients you are interested in studying. In other words, you want your data to be a **representative** sample.
+Let's say we have ensured that in fact the sample of training data we have fits the expected description. Now, we feel good about the integrity of our data! In other words, the training sample we have received are the ones we expected to receive and there hasn't been any mix up during shipping. But what if the content we are shipped were low quality or wrong to begin with.  Going back to the analogy of a detective dog, in our training we want to have lots of good example and counter-example scents. If we want our dog to distinguish between the scent of an explosive material and a cleaning material that smell similarly, we need to have familiarize our dog with both. In other wordrs, we want to have a **representative** sample.
+
 With that in mind, let's first try to understand our data. Some basic descriptive statistics can help us evaluate how representative our sample is to the population for which we are interested in applying our data.
 
 ```{r data overview, fig.width=10}

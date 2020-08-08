@@ -1,4 +1,5 @@
 library(learnr)
+library(glue)
 library(conflicted)
 library(tidyverse)
 library(plotly)
