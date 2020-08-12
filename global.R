@@ -4,17 +4,23 @@ library(conflicted)
 library(tidyverse)
 library(plotly)
 library(ggsci)
+# library(patchwork)
+library(mclust)
 library(fontawesome)
+library(survival)
 conflict_prefer("filter", "dplyr")
 conflict_prefer("select", "dplyr")
 conflict_prefer("map", "purrr")
 
-d <- d0 <- read_rds(path = "./pacSci__TCGA_BRCA_data2.RDS")
+# d <- d0 <- read_rds(path = "./pacSci__TCGA_BRCA_data2.RDS")
+
+d <- d0 <- read_rds(path = "./dataprep/output_data/pacSci__TCGA_BRCA_data.RDS")
+
 # d$pam50_genes <- (genefu::pam50)$centroids %>% rownames() %>% recode(., CDCA1 = "NUF2", KNTC2 = "NDC80")
 # saveRDS(object = d,file = "./pacSci__TCGA_BRCA_data2.RDS")
 
 
-d$gx$Primary_solid_Tumor %>% rename(patient = submitter_id) %>%
+d$gx$Primary_solid_Tumor %>% 
   right_join(d$molecular_subtype %>% dplyr::select(patient, BRCA_Subtype_PAM50), y = .) %>%
   mutate_if(.tbl = .,.predicate = is.numeric,.funs = function(x) log1p(x)) %>%
   mutate_if(.tbl = .,.predicate = is.numeric,.funs = function(x) scale(x,center = T,scale = T)[,1]) -> d$d_pam50
@@ -24,6 +30,24 @@ d$gx$Primary_solid_Tumor %>% rename(patient = submitter_id) %>%
 d$molecular_subtype <- d$molecular_subtype %>% 
   mutate_if(.predicate = is.character, .funs = function(x) replace(x,x=="NA",NA)) %>%
   purrr::discard(~sum(is.na(.x))/length(.x)* 100 >=50) 
+
+
+# Add pre-calculated mclust results for computational efficiency
+set.seed(12)
+
+c(g5 = 5, g4 = 4, g3 = 3, g2 = 2) %>% 
+  map(.x = ., .f = function(x) Mclust(data = d$gx$Primary_solid_Tumor %>% select(ESR1,PGR) %>% mutate_all(.funs = function(x) log1p(x)),G = x)) -> cls_mods
+
+d$molecular_subtype <- d$gx$Primary_solid_Tumor %>% select(id, patient) %>% 
+  cbind(mclust_esr1_pgr_g2 = glue("group {cls_mods$g2$classification}")) %>% 
+  cbind(mclust_esr1_pgr_g3 = glue("group {cls_mods$g3$classification}")) %>% 
+  cbind(mclust_esr1_pgr_g4 = glue("group {cls_mods$g4$classification}")) %>% 
+  cbind(mclust_esr1_pgr_g5 = glue("group {cls_mods$g5$classification}")) %>% 
+  left_join(d$molecular_subtype, y = .)
+
+
+# Generate 11 random numbers
+runif11 <- runif(n = 11, min = 0, max = 20) %>% round
 
 #' Given positive train and test sample sizes, this function returns valid patient ids
 #' @param n_train a positive integer default is the entire dataset
@@ -162,4 +186,31 @@ evaluate_calls <- function(model_calls){
     mutate(ppv = tp/(tp+fp), npv = tn/(tn+fn))
 
   list(confusion_matrix = confusion_mat, confusion_mat_stat = confusion_mat_stat)
+}
+
+
+#' This function simply provides a simple interface for giving a number of grouping g between 2 to 5 
+#' and getting the resultant classification plot
+#' @param g Number of grouping: either 2, 3, 4 or 5
+plot_g_cluster <- function(g){
+  
+  if(!is.numeric(g))
+    stop(glue("The number of groups g is set to {g}. Please provide a number value between 2 and 5"))
+  g <- as.integer(g)
+  
+  if(! g %in% c(2:5))
+    stop(glue("The number of groups g is set to {g}. Please provide a number value between 2 and 5"))
+  
+  clust_col <- glue("mclust_esr1_pgr_g{g}")
+  
+  dg <- d$gx$Primary_solid_Tumor %>% 
+    select(id, ESR1, PGR) %>% 
+    left_join(x = ., y = d$molecular_subtype %>% select("id",all_of(clust_col)),by="id") 
+  
+  dg %>%
+    ggplot(aes(x = log1p(ESR1), y = log1p(PGR), colour = mclust_esr1_pgr_g2)) +
+    geom_point(aes_string(colour = clust_col)) + 
+    ggsci::scale_color_jama() + 
+    guides(colour=guide_legend(title="Algorithm classified groups")) + 
+    theme(legend.position = "bottom")
 }

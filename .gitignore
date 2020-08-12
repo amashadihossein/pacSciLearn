@@ -11,5 +11,7 @@
 /rsconnect
 /png
 /pacSciLearn_files
+/dataprep/intermediate_files
+/dataprep/output_data
 *.html
 

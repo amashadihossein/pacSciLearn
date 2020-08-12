@@ -43,7 +43,7 @@ Explore and have fun!
 ## Checking Data Integrity
 (ACTIVITY VIDEO HERE)
 
-In your mission to help breast cancer patients better quantify their risk, modern machine learning and artificial intelligence (AI) algorithms can give you `r fa("superpowers",   fill ="red")` super power `r fa("superpowers",   fill ="red")`. Think of yourself as a detective, and your four-legged assistant here would be the algorithm you use. As a detective, you would want your detective dog to have a sensitive and accurate nose. Likewise, as a bioinformatician, you want an algorithm that sensitive and accurate.
+In your mission to help breast cancer patients better quantify their risk, modern machine learning and artificial intelligence (AI) algorithms can give you `r fa("superpowers",   fill ="red")` super power `r fa("superpowers",   fill ="red")`. Think of yourself as a detective, and your `r fa("paw")` four-legged assistant `r fa("paw")` here would be the algorithm you use. As a detective, you would want your detective dog to have a sensitive and accurate nose. Likewise, as a bioinformatician, you want an algorithm that sensitive and accurate.
 
 But beside and accurate and sensitive nose, as a detective you want your dog to be well-trained. Imagine, you wanted your dog to pick up the scent of a dangerous chemical in a warehouse filled with different shipments. For that you need to have trained your dog with the right scents or you'd have little chance of success. Similarly, your algorithm needs to have seen the right samples to be able to properly distinguish between cancers that may pose more risk to a patient than those that are more easily treatable. 
 
@@ -95,8 +95,8 @@ quiz(
 
 
 
-## Checking Data Quality
-
+## Checking Data Quality 
+<!-- `r fa("check-circle")` -->
 (ACTIVITY VIDEO HERE)
 
 ### Descriptive Statistics
@@ -150,6 +150,285 @@ quiz(
 ```
 
 
+## Finding Biological Signal 
+<!-- `r fa("search")` -->
+
+(ACTIVITY VIDEO HERE)
+
+Let's say we have completed our data integrity and quality check and we are happy with the sample data. Now we are ready to try to `r fa("search")` trace `r fa("search")` biological signal that could allow us to tell the difference between a low and a high risk breast tumor.  Looking at medical journals, we notice two genes, **ESR1** and **PGR** that are linked to important biological processes. We also know that the processes linked to ESR1 and PGR1 can quite often be abnormal in breast tumors. That piques our interest. What can we learn if we explore how active these genes are? Since we have two genes of interest, we can plot the value of these two genes for each patient in our data in a 2-dimensional graph easily.  In this plot, each patient is represented by a single point. Here, think you are looking at the patients (dots) from above. Patients move up the more their PGR gene is active and patient move to the right the more their ESR1 gene is active. 
+
+For example, for the patient represented by the point circled in the graph below 
+
+1. ESR1 value is `r d$gx$Primary_solid_Tumor %>% filter(id == "TCGA-BH-A1FU-01A-11R-A14D-07") %>% pull(ESR1) %>% log1p()` and 
+2. PGR1 value is `r d$gx$Primary_solid_Tumor %>% filter(id == "TCGA-BH-A1FU-01A-11R-A14D-07") %>% pull(PGR) %>% log1p()`. 
+
+Mouse over the point to confirm!
+
+```{r}
+highlight_id <- "TCGA-BH-A1FU-01A-11R-A14D-07"
+ggplotly(ggplot(d$gx$Primary_solid_Tumor, aes(x = log1p(ESR1), log1p(PGR), label = id)) + geom_point(alpha = .5) + geom_point(data = d$gx$Primary_solid_Tumor %>% filter(id == highlight_id),size = 5, colour = "red", shape = 21) )
+```
+
+Now, that we understand how this plot is constructed, let's take a closer look and see if we notice any pattern.
+
+```{r ESR1_PGR1_group_num}
+quiz(
+  question("If each dot represents one patient, do you see any groupings among how patients are arranged?",
+    answer("Yes, I see 3 groups"),
+    answer("Yes, I see 2 groups", correct = TRUE),
+    answer("No, it looks like patients are evenly spread")
+  )
+)
+
+```
+
+As humans we are really good at recognizing patterns visually. Let's see how an algorithm would do? Let's show the data we just looked at to at algorithm that tries to find grouping (or clustering) in data.  There are many algorithms that are designed to do this.  Here, we are using an algorithm that does something you probably did without even thinking about it: putting two imaginary circle of different shape around each dense area, with the circles (or ovals) trying to best cover all the dots. Let's try it out.
+
+
+```{r, echo=FALSE}
+inputPanel(actionButton("mclust_pushed", "Find and color two clusters"))
+plotOutput("mclust_2g")
+```
+
+```{r, context="server"}
+# TODO see if you can have a default one group prior to button push
+do_mclust_2g <- eventReactive(input$mclust_pushed, {
+  d$gx$Primary_solid_Tumor %>% 
+    select(id, ESR1, PGR) %>% 
+  left_join(x = ., y = d$molecular_subtype %>% select(id, mclust_esr1_pgr_g2),by="id") 
+})
+
+output$mclust_2g <- renderPlot({
+  do_mclust_2g() %>% 
+    ggplot(aes(x = log1p(ESR1), y = log1p(PGR), colour = mclust_esr1_pgr_g2)) +
+    geom_point() + 
+    ggsci::scale_color_jama() + 
+    guides(colour=guide_legend(title="Algorithm identified groups")) + 
+    theme(legend.position = "bottom")
+  })
+```
+
+Ok, not bad for an algorithm! It grouped our patients fairly well! But do these two groups tell us anything about patients' risk? For example, if a patient is in group 1 or group 2, are they likely to have different risks? We explore this question and more in the next section. However, the topic is somewhat advanced. Feel free to skip the material below as well as the next section.
+
+:::fyi
+#### Unsupervised vs. supervised machine learning
+Grouping or clustering is a form of machine learning called "unsupervised learning". Think of the example of training your dog to detect a scent among many. When you are showing your dog different small and then reward the dog for recognizing the scent, in effect, you are "supervising" its learning. You know what is the right scent and you reward the dog when it's found. If you trained your algorithm this way, it'd be called a supervised learning approach, where you know exactly what your algorithm needs to find. Now imagine, you have scents that are similar but come from different chemicals, you as the trainer don't know which scent comes from which chemical, but your dogs nose being very sensitive, it may be able to distinguish subtle similarities and differences. If your dog could tell you that the sample scents came from different chemicals, like 2 barks for 2 different chemicals (we are stretching this analogy), then without you supervising your dog's learning, it was able to recognize the patterns. You can see that this would be a harder task for your dog. It is also a much harder (and more interesting) problem for algorithm developers to solve.
+
+With unsupervised learning, you have tasks to completed
+
+1. Find out how many different grouping there are in your sample data
+2. Classify the data points into the groups
+
+Providing the number of groups, could make the task quite a bit simpler, but that's often not known and that's why lots of research continues to find ways for algorithms to do both tasks simultaneously. 
+:::
+
+
+:::code
+#### Use `r fa("r-project",   fill ="steelblue")` (Optional): 
+Here are using an algorithm called **mclust** (reference needed). mclust is quite smart and have ways of doing both tasks of finding the number of groups in your data as well as grouping your data accordingly. However, as smart as mclust is, there is no guarantee that it'll get the number of grouping right.  Try commanding R to cluster the data into 2, 3, 4 or 5 groups. Here `plot_g_cluster` is a function that accepts 2, 3, 4 or 5 as an input and generates an output plot based on the value of g. For example, `plot_g_cluster(g = 2)` should replicate the plot above. Note, mclust gave high quality scores to all these clustering results, but identified g=5 as the best option. In our case, this may not be scientifically meaningful so using scientific understanding, we may choose 2.
+
+```{r change_mclust_gropuing, exercise=TRUE}
+# Select g to be either 2, 3, 4, or 5
+plot_g_cluster(g = )
+
+```
+:::
+
+
+## Uncertainty (Advanced) 
+
+(ACTIVITY VIDEO HERE)
+
+:::note
+The following section is not required for your progress through the site. This section deals with a relatively advanced topics of uncertainty in statistical inference and survival analysis. Feel free to skip to the next section.
+:::
+
+At this point, we have picked up a pattern in the our data: Looking at the activity levels of these two important genes, we see two distinct grouping of patients:
+
+1. Patients with tumors that have both low ESR1 and low PGR activity
+2. Patients with tumors that have both high ESR1 and high PGR gene activity
+
+We expect that our patients with lower risk tumors to continue to survive breast cancer for longer time. Looking within each group, let's say we see that for the group with low ESR1 and PGR1 the percentage of patient who survival start dropping below 90% sooner than the other group, that may indicate the group with low ESR1 and PGR1 is associated with higher risk tumors. However, if we see no difference, we may conclude that we don't see evidence supporting that the biological grouping we saw can inform us about risk of a tumor. Let's take a look.
+
+```{r,echo=F}
+
+srv_fit <- d$molecular_subtype %>% mutate(status = if_else(vital_status == "Alive", 1, 2), time = as.numeric(days_to_last_followup)/365) %>%
+  survfit(Surv(time, status) ~ mclust_esr1_pgr_g2, data = .)
+
+srv_inference <- quantile(srv_fit,probs = .1)
+
+srv_inference_table <- srv_inference %>% map(.x = ., .f = function(x) data.frame(x) %>% mutate(g = rownames(.))) %>% bind_rows(.id = "param") %>% spread(param,X10) %>%
+  select(g, quantile, lower, upper) 
+
+srv_inference_table %>% 
+  select(g, quantile) %>%
+  mutate_if(is.numeric, function(x) signif(x,2))%>%
+  rename("Group" = g, "Years until survival falls below 90%" = quantile) %>% knitr::kable(.)
+
+# g1 <-ggplot(d$gx$Primary_solid_Tumor, aes(x = 0, y = log1p(ESR1))) +  geom_dotplot(binaxis = "y", stackdir = "center", fill = "white", binwidth = 1/9) + geom_violin(fill = NA, linetype = 2, colour = "blue") +xlim(-1, 1)
+
+# g2 <- ggplot(d$gx$Primary_solid_Tumor, aes(x = 0, y = log1p(PGR)))  + geom_dotplot(binaxis = "y", stackdir = "center", fill = "white", binwidth = 1/6.5) + geom_violin(fill = NA, linetype = 2, colour = "blue") + xlim(-1, 1)
+# 
+# g1 + g2
+# ggplot(d$gx$Primary_solid_Tumor, aes(x = log1p(ESR1), log1p(PGR) )) +geom_density_2d_filled(alpha=.3) + geom_point(alpha=.2)
+
+```
+
+<div id="srv-hint">
+**Hint:**  Remember a higher risk means it takes less time for the percentage of patients who have survival to fall below 90%
+</div>
+```{r srv_quiz}
+quiz(
+  question("Looking at the survival estimate, which group appears to have a higher risk",
+    answer("Group 2"),
+    answer("Group 1", correct = TRUE)
+  )
+)
+
+```
+
+You may have noticed that the quiz above is careful to use the word "**appears** to have a higher risk".  The reason is that we haven't accounted for uncertainty in our evaluation and every time you make an observation in a sample of a population (and here we are only looking at small fraction of all breast cancer patients), there is a chance that our observation is coincidence. There statistical techniques that allow us to quantify the uncertainty in our observations. A commonly used one is called a confidence interval. An intuitive definition for a 95% confidence interval is the range of typical values we expect for an observation based on data (the precise definition is less intuitive).  Now, let's look at our table of survival with 95% interval included.
+
+```{r}
+srv_inference_table %>% 
+  mutate_if(is.numeric, function(x) signif(x,2))%>%
+  rename("Group" = g, "Years until survival falls below 90%" = quantile) %>% knitr::kable(.)
+```
+
+Now, we can see that although we saw a trend in the data, our data does not even allow us to estimate the upper end of confidence interval for each group. In fact, we are unable to say that the difference we see between the two groups is not just a coincidence. As a bioinformatician, there are many times that you find a signal that you can't say for sure if it relates to questions your care about, even when the signal is real (and not noise).  As you train you algorithm, you want to make sure it is rooted in math and statistics because calling out false signals is key to finding the real signals.
+
+Coming back to the signal we found, is the grouping we found informative for our question? We can't tell based on the analyses we looked at. 
+
+
+## Training and Prediction 1
+
+(ACTIVITY VIDEO HERE)
+
+In the previous section, we saw that although we found a real biological signal, based on the data we had, we couldn't be certain that the grouping we have found can inform us about the risk a tumor poses to a patient. Fortunately, we can always get help from work of others. In our case, a well-established algorithm for classification of breast cancer, known as PAM50,is available for researcher.
+
+Given that we have PAM50 classification available for our sample data, can we train an algorithm to predict PAM50 classification for a new sample? Given all the existing studies on PAM50 classification, if our algorithm succeeds, we know that it can help us with our mission: informing patients about the risk they are facing with their tumor. Of course, this is  reverse-engineering PAM50 algorithm, but serves as a good exercise is showing how to train an algorithm built on basic statistics.  Here we are going to use two concepts in quantifying data:
+
+1. Population median
+2. Mathematical distance
+
+Some of you may be familiar with one or both, but don't worry if you are not. We'll talk more about both.
+
+:::fyi
+#### PAM50 Algorithm:
+
+PAM50 algorithm (reference needed)takes its name from the 50 genes that it measures to group breast cancer tumors into 5 categories.  In our attempt at classification, we used only 2 genes. PAM50 uses ESR1 and PGR those two genes, but also another 48 genes that are rigorously selected. The additional genes, informed by biological insight creates a grouping algorithm that has been shown through many independent investigations to provide information about relative differences in risks associated with breast cancer tumors.
+
+**Important note:** Like many other tools and technologies, PAM50 algorithm as referred to here is used for researchers to gain insight about breast cancer. However its use in medical practice would require additional level of rigor that is beyond the scope what we are concerned with here.
+:::
+
+### Median
+
+Let's say you have 11 numbers, median simply orders the numbers from smallest to largest and picks the middle number (6th number here). If you have an even number of values (ex. 10) numbers things are bit different but the application is the same: *It gives a sense of the what's approximately at the center of the measurements you have.*  
+
+```{r meidan_qz}
+quiz(
+  question(glue("Given the sorted 11 numbers {paste(sort(runif11), collapse = \", \")}, can you spot the median?"),
+    answer(glue("{min(runif11)}")),
+     answer(glue("{signif(mean(runif11),2)}")),
+    answer(glue("{quantile(runif11,probs = .5)}"), correct = TRUE),
+    answer(glue("{max(runif11)}"))
+  )
+)
+
+```
+
+
+### Distance
+
+The concept of mathematical distance is not a lot different from how you think about it in real life. In fact, you can probably readily answer the question below.
+  
+
+```{r distance_quiz}
+list(
+  A = list(x = 0, y= 0),
+  B = list(x = 4, y= 3),
+  C = list(x = 0, y= 3)
+) %>% 
+  bind_rows(.id = "label") %>%
+  ggplot(aes(x = x, y = y, label = label)) +
+  geom_segment(x = 0, xend = 4, y = 0, yend = 3, linetype=2, colour = "blue")+
+  geom_segment(x = 0, xend = 4, y = 3, yend = 3, linetype=2, colour = "red")+
+  geom_segment(x = 0, xend = 0, y = 0, yend = 3, linetype=2, colour = "forestgreen") +
+  geom_point(size = 12)+ 
+  geom_text(size= 10, colour = "white")+
+    xlim(0,4)+ ylim(0,3) + coord_fixed()
+
+quiz(
+  question("If you have three data points, A, B and C, which two are closets?",
+           answer("A and B: Blue dashed line"),
+           answer("A and C: Green dashed line", correct = TRUE),
+           answer("B and C: Red dashed line")
+  )
+)
+```
+
+:::fyi
+The distance we just used to quantify closeness is called Euclidean distance and is one of the ways closeness or similarity is measured in statistics and mathematics. There are many other measurements of closeness (or distance in a generic sense). For example, correlation and its variations are also distances. However, no matter what type of distance you use, the utility is typically to measure closeness or similarity and you can be sure distance from point A to B is always the same as distance measured from point B to A. 
+:::
+
+### Training Strategy
+
+Now, we know median, and we know distance. How can we make a classification algorithm based on these two?
+
+Let's work through a toy example. Let's say we have 3 groups, A, B and C that we want to divide our patients into and two genes we measure on each patient. Additionally, let's say, we know the point around which each of our 3 groups are centered. Specifically, these points are the median of gen1 and gene 2 for each group. To identify which group the new sample "?" belongs to, all we need to do is to measure which one of the 3 centers, our new sample is closest to.
+
+```{r classification_quiz}
+list(
+    low = list(x = 0, y= 0, type = "centroid"),
+    median = list(x = 4, y= 3, type = "centroid"),
+    high = list(x = 0, y= 3, type = "centroid"),
+    "?" = list(x = 1, y= 2, type = "datapoint")
+) %>% 
+    bind_rows(.id = "label") %>%
+  ggplot(aes(x = x, y = y, label = label, shape = type)) +
+  geom_segment(x = 1, xend = 0, y = 2, yend = 3, linetype=2, colour = "forestgreen")+
+  geom_segment(x = 1, xend = 0, y = 2, yend = 0, linetype=2, colour = "red")+
+  geom_segment(x = 1, xend = 4, y = 2, yend = 3, linetype=2, colour = "blue") +
+  geom_point(aes(size = type, shape = type))+ 
+  geom_text(size= 5, aes(colour = type) )+
+  xlim(0,4)+ ylim(0,3) + coord_fixed() +
+  xlab("Gene 1") + ylab("Gene 2") + 
+  scale_size_manual(values = c(centroid = 25, datapoint = 10)) + 
+  scale_color_manual(values = c(centroid = "white", datapoint = "white")) +
+  scale_shape_manual(values = c(centroid = 16, datapoint = 15)) +
+  theme(legend.position = "none")
+
+quiz(
+  question("Which group does the new sample that is shown by a question mark belong to?",
+           answer("A"),
+           answer("C", correct = TRUE),
+           answer("B")
+  )
+)
+```
+
+
+So our strategy is clear:
+
+1. Define the center of each group as the coordinate point representing the median of all genes measured in that group.
+2. Given a new sample, measure the distance to each of the centers and categorize the new sample as belonging to the center it is closest to.
+
+
+## Training and Prediction 2
+
+(ACTIVITY VIDEO HERE)
+
+You now have the basic foundations to start building a model that could help with the task of distinguishing between low and high risk breast cancer.  Let's list the key facts we know
+
+1. We know that PAM50 classifications can give us information about tumor risk
+2. We also know that we have these classification in our data-set for each patient. This divides our population into 5 groups.
+
+Our algorithm should therefore be able to tell compare a new sample with each of these 5 groups. The group that the new sample should belong to is the group where the sample is most similar. But how do we measure "similarity"?
+
+
+
+
+
 
 ## Topic 1
 
@@ -162,6 +441,9 @@ Write the R code required to add two plus two:
 ```{r two-plus-two, exercise=TRUE}
 
 ```
+
+<!-- ggplot(d$gx$Primary_solid_Tumor, aes(x = log1p(ESR1), log1p(PGR) )) +geom_density_2d_filled(alpha=.3) + geom_point(alpha=.2) +theme_void() -->
+<!-- ggplot(d$gx$Primary_solid_Tumor, aes(x = log1p(ESR1))) +geom_histogram(colour="white", aes(y = ..ncount..)) + geom_density(aes(y = ..scaled..)) -->
 
 
 ### Exercise with Code
