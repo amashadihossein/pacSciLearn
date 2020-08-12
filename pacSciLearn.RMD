@@ -371,7 +371,7 @@ quiz(
 The distance we just used to quantify closeness is called Euclidean distance and is one of the ways closeness or similarity is measured in statistics and mathematics. There are many other measurements of closeness (or distance in a generic sense). For example, correlation and its variations are also distances. However, no matter what type of distance you use, the utility is typically to measure closeness or similarity and you can be sure distance from point A to B is always the same as distance measured from point B to A. 
 :::
 
-### Training Strategy
+### Algorithm training Strategy
 
 Now, we know median, and we know distance. How can we make a classification algorithm based on these two?
 
@@ -414,16 +414,50 @@ So our strategy is clear:
 2. Given a new sample, measure the distance to each of the centers and categorize the new sample as belonging to the center it is closest to.
 
 
-## Training and Prediction 2
+## Training our algorithm
 
 (ACTIVITY VIDEO HERE)
 
-You now have the basic foundations to start building a model that could help with the task of distinguishing between low and high risk breast cancer.  Let's list the key facts we know
+You now have the basic foundations to start building a model that could help with the task of distinguishing between low and high risk breast cancer tumors. We now have a strategy. We just need to adjust it to grouping of PAM50 as we know they can give us information about tumor risk. So our adjusted startegy woudl be
 
-1. We know that PAM50 classifications can give us information about tumor risk
-2. We also know that we have these classification in our data-set for each patient. This divides our population into 5 groups.
+1. Define the center of each **PAM50** group as the coordinate point representing the median of all  **50** genes measured in that group.
+2. Given a new sample, measure the distance to each of the centers and categorize the new sample as belonging to the center it is closest to.
 
-Our algorithm should therefore be able to tell compare a new sample with each of these 5 groups. The group that the new sample should belong to is the group where the sample is most similar. But how do we measure "similarity"?
+:::note
+Compare this strategy with that outline at the end previous section.  You notice, that our strategy is almost identical to the strategy we explored in the toy example in the last section. The major difference is that we now have 5 groups instead of the 3 groups (of low, median and high) in the toy example. So given a new sample, we woudl need to measure distance to 5 spots instead of 3 spots. That's not a major leap.
+
+A bigger difference is that instead of 2 genes, we have 50 genes. We can plot 2-dimensional plots easily. However, we can't visualize 50 dimensions. However, distances are measured exactly the same way as in 2 dimensions, even when we can't visualize the data.
+:::
+
+
+### Training our algorithm
+
+Fortunately, in our data, we know the PAM50 grouping for each tumor, so we could easily calculate the median of each 50 gene within each group and store the value. So given the 5 groups, we'll have 5 sets of median values, and given that we calculate the median of each of the 50 genes, each set will have 50 values in it.  This is all the training our model will require! So going back to our toy example, this is similar to us calculating the points low, medium and high. With the points fixed, we are ready to group any new patients, by measuring its distance to each of the point.
+
+But how do you measure distance when you have 50 genes instead of 2 genes? this sounds more complicated than it actually is. You can in fact do this with a bit of algebra. You can believe me or if interested read the notes section and try it out for yourself.
+
+```{r, include=FALSE}
+
+pt_ids <- get_train_test_patient_ids()
+mod <- get_model(patient_ids_train = pt_ids$patient_ids_train)
+mod_calls <- mod(patient_ids_predict = pt_ids$patient_ids_train)
+calls_evaluated <- evaluate_calls(model_calls = mod_calls)
+overall_accuracy <- calls_evaluated$confusion_mat_stat %>% summarise_if(is.numeric,sum) %>% mutate(accuracy = (TP + TN)/(TP + TN + FP + FN)) %>% pull(accuracy)
+```
+
+
+### Evaluating our model
+
+You may now be wondering how good is this model we trained just based on a simple median?  Let's take a look.
+
+If we use all our data compute the medians our overall accuracy will be `r signif(overall_accuracy,2)`
+
+We can look closer by grouping
+
+```{r echo=F}
+calls_evaluated$confusion_mat_stat %>% mutate(accuracy = (TP + TN)/(TP + TN + FP + FN)) %>% ggplot(aes(x = subtype, y = accuracy)) + geom_col() + coord_flip()
+```
+
 
 
 

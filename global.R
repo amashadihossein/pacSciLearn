@@ -16,7 +16,7 @@ conflict_prefer("map", "purrr")
 
 d <- d0 <- read_rds(path = "./dataprep/output_data/pacSci__TCGA_BRCA_data.RDS")
 
-# d$pam50_genes <- (genefu::pam50)$centroids %>% rownames() %>% recode(., CDCA1 = "NUF2", KNTC2 = "NDC80")
+d$pam50_genes <- (genefu::pam50)$centroids %>% rownames() %>% recode(., CDCA1 = "NUF2", KNTC2 = "NDC80")
 # saveRDS(object = d,file = "./pacSci__TCGA_BRCA_data2.RDS")
 
 
@@ -26,7 +26,7 @@ d$gx$Primary_solid_Tumor %>%
   mutate_if(.tbl = .,.predicate = is.numeric,.funs = function(x) scale(x,center = T,scale = T)[,1]) -> d$d_pam50
 
 
-# Clean up: Remove columsn with too many NAs in subtype
+# Clean up: Remove column with too many NAs in subtype
 d$molecular_subtype <- d$molecular_subtype %>% 
   mutate_if(.predicate = is.character, .funs = function(x) replace(x,x=="NA",NA)) %>%
   purrr::discard(~sum(is.na(.x))/length(.x)* 100 >=50) 
@@ -52,7 +52,7 @@ runif11 <- runif(n = 11, min = 0, max = 20) %>% round
 #' Given positive train and test sample sizes, this function returns valid patient ids
 #' @param n_train a positive integer default is the entire dataset
 #' @param n_test a positive integer default is 0
-#' @param mutually_exclusive T/F determins if train and test should be mutually exclusive, default is T
+#' @param mutually_exclusive T/F determines if train and test should be mutually exclusive, default is T
 get_train_test_patient_ids <- function(n_train = nrow(d$d_pam50), n_test = nrow(d$d_pam50) - n_train, mutually_exlusive = T){
   
   small_n_train_threshold <- 100
