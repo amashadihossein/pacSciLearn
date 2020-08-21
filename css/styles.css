@@ -13,7 +13,7 @@ h3 {
 body {
   background-color: white;
   font-family: 'Source Sans Pro', sans-serif;
-  font-size: 12;
+  font-size: 19;
 }
 .topicsList .topic {
     font-family: 'Roboto Slab', serif;
@@ -50,6 +50,7 @@ body {
     transition-duration: 0.25s;
 }
 /* -----------div tips------------- */
+/* bed3ec  dfedff */
 
 div.puzzle, div.fyi, div.code, div.note {
     padding: 1em;
@@ -60,8 +61,8 @@ div.puzzle, div.fyi, div.code, div.note {
     background-position: 15px center;
     min-height: 120px;
     color: #1f5386;
-    background-color: #bed3ec;
-    border: solid 5px #dfedff;
+    background-color: #dfedff;
+    border: solid 5px #bed3ec;
   }
   
 div.puzzle {
@@ -70,6 +71,7 @@ div.puzzle {
 
 div.fyi {
  background-image: url("div-icons/fyi.png");
+ border: dashed 5px #bed3ec;
 }
 
 div.code {
@@ -78,4 +80,6 @@ div.code {
 
 div.note {
   background-image: url("div-icons/Lightbulb.png");
+  background-color: #e3dfec;
+  border: dashed 5px #b9b0cf;
 }

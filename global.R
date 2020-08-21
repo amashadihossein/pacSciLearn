@@ -4,7 +4,7 @@ library(conflicted)
 library(tidyverse)
 library(plotly)
 library(ggsci)
-# library(patchwork)
+library(patchwork)
 library(mclust)
 library(fontawesome)
 library(survival)
@@ -16,7 +16,7 @@ conflict_prefer("map", "purrr")
 
 d <- d0 <- read_rds(path = "./dataprep/output_data/pacSci__TCGA_BRCA_data.RDS")
 
-d$pam50_genes <- (genefu::pam50)$centroids %>% rownames() %>% recode(., CDCA1 = "NUF2", KNTC2 = "NDC80")
+# d$pam50_genes <- (genefu::pam50)$centroids %>% rownames() %>% recode(., CDCA1 = "NUF2", KNTC2 = "NDC80")
 # saveRDS(object = d,file = "./pacSci__TCGA_BRCA_data2.RDS")
 
 
@@ -47,7 +47,8 @@ d$molecular_subtype <- d$gx$Primary_solid_Tumor %>% select(id, patient) %>%
 
 
 # Generate 11 random numbers
-runif11 <- runif(n = 11, min = 0, max = 20) %>% round
+# runif11
+rnorm11 <- rnorm(n = 11, mean = 75, sd = 10) %>% round
 
 #' Given positive train and test sample sizes, this function returns valid patient ids
 #' @param n_train a positive integer default is the entire dataset

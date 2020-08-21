@@ -107,7 +107,10 @@ d$gx$Primary_solid_Tumor <- d$gx$Primary_solid_Tumor %>% filter(patient %in% int
 dataSubt <- dataSubt %>% filter(patient %in% intersect(dataSubt$patient, d$gx$Primary_solid_Tumor$patient))
 d$molecular_subtype <- dataSubt
 
-dir.exists("./output_data"){
+# Add PAM50 genes
+d$pam50_genes <- (genefu::pam50)$centroids %>% rownames() %>% recode(., CDCA1 = "NUF2", KNTC2 = "NDC80")
+
+dir.exists(!"./output_data"){
   dir.create("./output_data")
 }
 
