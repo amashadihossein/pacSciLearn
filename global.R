@@ -14,7 +14,7 @@ conflict_prefer("map", "purrr")
 
 # d <- d0 <- read_rds(path = "./pacSci__TCGA_BRCA_data2.RDS")
 
-d <- d0 <- read_rds(path = "./dataprep/output_data/pacSci__TCGA_BRCA_data.RDS")
+d <- d0 <- read_rds(file = "./dataprep/output_data/pacSci__TCGA_BRCA_data.RDS")
 
 # d$pam50_genes <- (genefu::pam50)$centroids %>% rownames() %>% recode(., CDCA1 = "NUF2", KNTC2 = "NDC80")
 # saveRDS(object = d,file = "./pacSci__TCGA_BRCA_data2.RDS")
