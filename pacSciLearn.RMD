@@ -1,5 +1,5 @@
 ---
-title: "PacSci Learn at Home (Under Construction)"
+title: "PacSci Learn at Home"
 favicon: "images/favicon_io"
 output: 
   learnr::tutorial:
@@ -28,11 +28,11 @@ sample_data <- d$gx$Primary_solid_Tumor %>% slice(1:95)
 ![](https://www.youtube.com/watch?v=eG8S-KgjPFE&feature=youtu.be) 
 
 
-TODO: 
+<!-- TODO:  -->
 
--  Add text about the mission students are tasked with: helping distinguish high risk from low risk breast cancer tumor.
+<!-- -  Add text about the mission students are tasked with: helping distinguish high risk from low risk breast cancer tumor. -->
 
-- Add definition on the terms used: e.g. algorithm, R, descriptive statistics, etc.
+<!-- - Add definition on the terms used: e.g. algorithm, R, descriptive statistics, etc. -->
 
 
 :::note
@@ -51,7 +51,7 @@ This site is set up to accompany you as you try your hand at some of the tools, 
 Explore and have fun!
 
 ## Checking Data Integrity
-(ACTIVITY VIDEO HERE)
+<!-- (ACTIVITY VIDEO HERE) -->
 
 In your mission to help breast cancer patients better quantify their risk, modern machine learning and artificial intelligence (AI) algorithms can give you `r fa("superpowers",   fill ="darkviolet")` super power `r fa("superpowers",   fill ="darkviolet")`. Think of yourself as a detective, and your `r fa("paw",   fill ="darkviolet")` four-legged assistant `r fa("paw",   fill ="darkviolet")` here would be the algorithm you use. As a detective, you would want your detective dog to have a sensitive and accurate nose. Likewise, as a bioinformatician, you want an algorithm that is sensitive and accurate.
 
@@ -118,7 +118,7 @@ quiz(
 
 ## Checking Data Quality 
 <!-- `r fa("check-circle")` -->
-(ACTIVITY VIDEO HERE)
+<!-- (ACTIVITY VIDEO HERE) -->
 
 ### Descriptive Statistics
 Let's say we have made sure that in fact the sample of training data we have fits the expected description. Now, we feel good about the integrity of our data! In other words, the training sample we have received are the ones we expected to receive, and there hasn't been any mix up during shipping. But what if the content we are shipped were low quality or wrong to begin with.  Going back to the analogy of a detective dog, in our training we want to have lots of good example and counter-example scents. If we want our dog to distinguish between the scent of an explosive material and a cleaning material that smells similarly, we need to have familiarized our dog with both. In other words, we want to have a **representative** sample.
@@ -190,7 +190,7 @@ quiz(
 ## Finding Biological Signal 
 <!-- `r fa("search")` -->
 
-(ACTIVITY VIDEO HERE)
+<!-- (ACTIVITY VIDEO HERE) -->
 
 Let's say we have completed our data integrity and quality check and we are happy with the sample data. Now we are ready to try to `r fa("search",   fill ="darkviolet")` trace `r fa("search",   fill ="darkviolet")` biological signal that could allow us to tell the difference between a low and a high risk breast tumor.  Looking at medical journals, we notice two genes, **ESR1** and **PGR** that are linked to important biological processes. We also know that the processes linked to ESR1 and PGR can quite often be abnormal in breast tumors. That piques our interest. What can we learn if we explore how active these genes are? Since we have two genes of interest, we can plot the value of these two genes for each patient in our data in a 2-dimensional graph easily.  In this plot, each patient is represented by a single point. Here, imagine you are looking at the patients (dots) from above. The more a patient's ESR1 gene is active the more she moves to the right (along the horizontal axis) and the more her PGR gene is active, the higher that patient moves (along the vertical axis). 
 
@@ -275,7 +275,7 @@ plot_g_cluster(g = )
 
 ## Training and Prediction 1
 
-(ACTIVITY VIDEO HERE)
+<!-- (ACTIVITY VIDEO HERE) -->
 
 In the previous section, we saw that although we found a real biological signal, based on the data we had, we couldn't be certain that the grouping we have found can inform us about the risk a tumor poses to a patient. Fortunately, we can always get help from work of others. In our case, a well-established algorithm for grouping of breast cancer, known as PAM50,is available for researcher.
 
@@ -422,7 +422,7 @@ So our strategy is clear:
 
 ## Training and Prediction 2
 
-(ACTIVITY VIDEO HERE)
+<!-- (ACTIVITY VIDEO HERE) -->
 
 You now have a strategy to start building an algorithm that could help with the task of distinguishing between low and high risk breast cancer tumors. Instead of the made-up low, medium, and high categories, we just need to find groupings that are shown to be meaningful. PAM50 grouping, as we learned, gives us one such grouping. So our adjusted strategy is:
 
@@ -469,7 +469,7 @@ This may look or sound complex, but it is just simple algebra! Let's try a coupl
 
 ## Testing the Algorithm
 
-(ACTIVITY VIDEO HERE)
+<!-- (ACTIVITY VIDEO HERE) -->
 
 Congratulations! We just trained an algorithm based on real patient data. Now we would want to know how well-trained our algorithm is, much like a detective might want to know about his 4-legged assistant. As we said in the beginning, we might want to know accuracy, sensitivity and specificity of algorithm.  So let's test how well our simple strategy that was just trained based on median values of gene activities does. 
 
@@ -640,7 +640,7 @@ We admit, some of these concept may have been a bit challenging. We know, findin
 
 ## Uncertainty (Advanced) 
 
-(ACTIVITY VIDEO HERE)
+<!-- (ACTIVITY VIDEO HERE) -->
 
 :::note
 The following section is not required for your progress through the site. This section deals with a relatively advanced topics of uncertainty in statistical inference and survival analysis. Feel free to skip to the next section.
