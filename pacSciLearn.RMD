@@ -22,10 +22,10 @@ sample_data <- d$gx$Primary_solid_Tumor %>% slice(1:95)
 
 ## Introduction
 
-<!-- ### A Short Videoe -->
+<!-- ### A Short Video -->
 <!-- ![](https://www.youtube.com/watch?v=6KiLt2yt5xI) -->
 
-![](https://www.youtube.com/watch?v=eG8S-KgjPFE&feature=youtu.be) 
+![](https://youtu.be/-ekEimut7lo) 
 
 
 <!-- TODO:  -->
