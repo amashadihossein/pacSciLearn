@@ -14,7 +14,7 @@ options(warn=-1)
 knitr::opts_chunk$set(echo = FALSE)
 source("./global.R")
 
-# Just get the data we need
+# Just get the data we need and no more
 sample_data_expected_n <- 100
 sample_data <- d$gx$Primary_solid_Tumor %>% slice(1:95)
 ```
